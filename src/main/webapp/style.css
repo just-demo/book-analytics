@@ -1,0 +1,81 @@
+td.common,    div.common    {background-color: #A0FFA0;}
+td.proper,    div.proper    {background-color: #A0D0FF;}
+td.undefined, div.undefined {background-color: #0050FF;}
+td.unknown,   div.unknown   {background-color: #FF0000;}
+td.translated,div.translated input[name='translation'] {background-color: #E0FFE0;}
+td.saved,     div.saved input[name='translation']      {background-color: #50A050;}
+td.ignorable, div.ignorable input[name='text']         {background-color: #A0A0A0;}
+td.modified,  div.modified  input[name='translation']  {background-color: #FFFF00;}
+
+#words {
+	display: inline-block;
+	padding: 0px 1px 1px 1px;
+	background-color: #505050;
+}
+
+#filter td {
+	width: 100px;
+}
+
+#filter {
+	position: fixed;
+	background-color: #FFF;
+	border: 3px ridge #AAAAAA;
+	display: none;
+}
+
+#book_uploader {
+	border: 0;
+	width: 400px;
+	height: 70px;
+}
+
+.translate {
+	width: 25px;
+}
+
+#words span.number {
+	display: inline-block;
+	width: 50px;
+}
+
+.group {
+	margin-top: 1px;
+}
+
+.groupWrapper {
+	background-color: #C0FFC0;
+}
+
+.word {
+	margin-top: 1px;
+}
+
+#translationMenu {
+	position: absolute;
+	display: none;
+}
+
+#translationMenuItems {
+	margin-left: 3px;
+	border: 1px solid #AAAAAA;
+	display: inline-block;
+}
+
+#translationMenuItems div {
+	padding: 0 5px;
+	cursor: pointer;
+	color: #555555;
+}
+
+#translationMenuItems div:hover {
+	color: #000;
+	background-color: #DDD;
+}
+
+#translationMenuClose {
+	font-family: Lucida Console;
+	font-weight: bold;
+	color: #AAAAAA;
+	cursor: pointer;
+}
