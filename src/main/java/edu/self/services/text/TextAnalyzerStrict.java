@@ -1,11 +1,8 @@
 package edu.self.services.text;
 
-import edu.self.model.WordInfo;
-import edu.self.model.UserWord;
 import edu.self.utils.TextUtils;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -124,16 +121,6 @@ public class TextAnalyzerStrict implements TextAnalyzer {
         if (!word.isEmpty() && !Character.isUpperCase(word.charAt(0)) && isManagedWord(TextUtils.capitalize(word))) {
             System.out.println(word);
         }
-        return null;
-    }
-
-    @Override
-    public List<UserWord> getWords(String text) {
-        return null;
-    }
-
-    @Override
-    public Map<String, WordInfo> getWordStatistics(String text) {
         return null;
     }
 }

@@ -7,56 +7,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import edu.self.model.WordInfo;
-import edu.self.model.UserWord;
 import edu.self.utils.TextUtils;
 
 public class TextAnalyzerWise implements TextAnalyzer {
     @Override
     public Map<String, Integer> getWordOccurrences(String text) {
         List<WiseWord> words = getWordsPrepared(text);
-        return getWordOccurrencies(words);
-    }
-
-    @Override
-    public Map<String, WordInfo> getWordStatistics(String text) {
-        List<WiseWord> words = getWordsPrepared(text);
-        return getWordStatistics(words);
-    }
-
-    private Map<String, WordInfo> getWordStatistics(List<WiseWord> words) {
-        Map<String, WordInfo> wordStatistics = new TreeMap<>();
-        for (WiseWord word : words) {
-
-            String wordString = word.getResult();
-            WordInfo wordInfo;
-            if (wordStatistics.containsKey(wordString)) {
-                wordInfo = wordStatistics.get(wordString);
-            } else {
-                wordInfo = new WordInfo();
-                wordStatistics.put(wordString, wordInfo);
-            }
-            wordInfo.incrementTotal();
-            if (word.isCommon()) {
-                wordInfo.incrementCommon();
-            }
-            if (word.isProper()) {
-                wordInfo.incrementProper();
-            }
-            if (word.isStrange()) {
-                wordInfo.incrementStrange();
-            }
-            if (word.isUndefined()) {
-                wordInfo.incrementUndefined();
-            }
-        }
-        return wordStatistics;
-    }
-
-    @Override
-    public List<UserWord> getWords(String text) {
-        // TODO Auto-generated method stub
-        return null;
+        return getWordOccurrences(words);
     }
 
     private List<WiseWord> getWordsPrepared(String text) {
@@ -82,16 +39,17 @@ public class TextAnalyzerWise implements TextAnalyzer {
         for (WiseWord word : words) {
             word.clarify(common, proper);
         }
+
         return words;
     }
 
-    private Map<String, Integer> getWordOccurrencies(List<WiseWord> words) {
-        Map<String, Integer> wordOccurrencies = new TreeMap<>();
+    private Map<String, Integer> getWordOccurrences(List<WiseWord> words) {
+        Map<String, Integer> wordOccurrences = new TreeMap<>();
         for (WiseWord word : words) {
             String wordString = word.getResult();
-            wordOccurrencies.put(wordString, wordOccurrencies.containsKey(wordString) ? wordOccurrencies.get(wordString) + 1 : 1);
+            wordOccurrences.put(wordString, wordOccurrences.containsKey(wordString) ? wordOccurrences.get(wordString) + 1 : 1);
         }
-        return wordOccurrencies;
+        return wordOccurrences;
     }
 
     private static class WiseWord {

@@ -102,7 +102,7 @@ public class BookController {
                 group.add(new Object[]{
                         word, // text
                         translation, // translation
-                        wordOccurrences.get(word), // occurancy
+                        wordOccurrences.get(word), // occurrence
                         isTranslationSaved ? 1 : 0, // is translation saved
                         userPreferenceService.isIgnorable(word) ? 1 : 0, // ignorable
                         managedWords.contains(word) ? 1 : 0, // is managed
