@@ -6,19 +6,19 @@ import java.util.List;
 import java.util.Map;
 
 import edu.self.model.WordInfo;
-import edu.self.model.user.UserWord;
-import edu.self.services.google.translate.GoogleTranslate;
+import edu.self.model.UserWord;
+import edu.self.services.TranslationService;
 import edu.self.utils.TextUtils;
 
 public class TextAnalyzerCurious implements TextAnalyzer {
-    private GoogleTranslate google;
+    private TranslationService translationService;
 
-    public TextAnalyzerCurious(GoogleTranslate google) {
-        this.google = google;
+    public TextAnalyzerCurious(TranslationService translationService) {
+        this.translationService = translationService;
     }
 
     @Override
-    public Map<String, Integer> getWordOccurrencies(String text) {
+    public Map<String, Integer> getWordOccurrences(String text) {
         return null; //not implemented
     }
 
@@ -29,7 +29,7 @@ public class TextAnalyzerCurious implements TextAnalyzer {
     }
 
     public List<UserWord> getWords(String text) {
-        Map<String, UserWord> words = new HashMap<String, UserWord>();
+        Map<String, UserWord> words = new HashMap<>();
         String[] wordArray = text.split("\\s+");
         for (String wordText : wordArray) {
             wordText = TextUtils.cutEnding(TextUtils.trimNonLetters(wordText));
@@ -38,7 +38,7 @@ public class TextAnalyzerCurious implements TextAnalyzer {
                 if (words.containsKey(wordLowerCase)) {
                     words.get(wordLowerCase).incrementCount();
                 } else {
-                    String translation = google.translate(wordLowerCase);
+                    String translation = translationService.translate(wordLowerCase);
                     UserWord word = new UserWord(wordText, translation);
                     if (!translation.isEmpty()) {
                         if (Character.isUpperCase(translation.charAt(0))) {
@@ -52,23 +52,6 @@ public class TextAnalyzerCurious implements TextAnalyzer {
                 }
             }
         }
-        return new ArrayList(words.values());
+        return new ArrayList<>(words.values());
     }
-
-//	private void logStatistics(Map<String, Word> words){
-//		int common = 0;
-//		int proper = 0;
-//				
-//		for (String wordText: words.keySet()){
-//			Word word = words.get(wordText);
-//			if (word.isCommon()){
-//				++common;
-//			}
-//			else if (word.isProper()){
-//				++proper;
-//			}
-//		}
-//		int undefined = words.keySet().size() - (proper + common);
-//		Logger.getAnonymousLogger().log(Level.INFO, "statistics: " + common + "/" + proper + "/" + undefined);
-//	}
 }

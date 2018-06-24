@@ -69,6 +69,6 @@ public class WordInfo implements Comparable<WordInfo> {
 
     @Override
     public int compareTo(WordInfo o) {
-        return ((Integer) total).compareTo(o.total);
+        return Integer.compare(total, o.total);
     }
 }

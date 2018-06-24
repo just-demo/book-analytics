@@ -1,13 +1,13 @@
 package edu.self.services.text;
 
+import edu.self.model.WordInfo;
+import edu.self.model.UserWord;
+import edu.self.utils.TextUtils;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import edu.self.model.WordInfo;
-import edu.self.model.user.UserWord;
-import edu.self.utils.TextUtils;
 
 public class TextAnalyzerStrict implements TextAnalyzer {
     private static final String[] ignorableSuffixes = TextUtils.getAllCases("'s", "'d", "'ll", "'re", "'ve", "n't").toArray(new String[]{});
@@ -18,10 +18,10 @@ public class TextAnalyzerStrict implements TextAnalyzer {
     }
 
     @Override
-    public Map<String, Integer> getWordOccurrencies(String text) {
-        Map<String, Integer> words = new HashMap<String, Integer>();
-        Map<String, Integer> nonManagedWords = new HashMap<String, Integer>();
-        Map<String, String> aliases = new HashMap<String, String>();
+    public Map<String, Integer> getWordOccurrences(String text) {
+        Map<String, Integer> words = new HashMap<>();
+        Map<String, Integer> nonManagedWords = new HashMap<>();
+        Map<String, String> aliases = new HashMap<>();
         for (String word : text.split("\\s+")) {
             if (word.length() > 1) {
                 String managedWord = fetchManagedWord(word);

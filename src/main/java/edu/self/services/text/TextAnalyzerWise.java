@@ -8,12 +8,12 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import edu.self.model.WordInfo;
-import edu.self.model.user.UserWord;
+import edu.self.model.UserWord;
 import edu.self.utils.TextUtils;
 
 public class TextAnalyzerWise implements TextAnalyzer {
     @Override
-    public Map<String, Integer> getWordOccurrencies(String text) {
+    public Map<String, Integer> getWordOccurrences(String text) {
         List<WiseWord> words = getWordsPrepared(text);
         return getWordOccurrencies(words);
     }
@@ -25,7 +25,7 @@ public class TextAnalyzerWise implements TextAnalyzer {
     }
 
     private Map<String, WordInfo> getWordStatistics(List<WiseWord> words) {
-        Map<String, WordInfo> wordStatistics = new TreeMap<String, WordInfo>();
+        Map<String, WordInfo> wordStatistics = new TreeMap<>();
         for (WiseWord word : words) {
 
             String wordString = word.getResult();
@@ -61,9 +61,9 @@ public class TextAnalyzerWise implements TextAnalyzer {
 
     private List<WiseWord> getWordsPrepared(String text) {
         WiseWord previous = null;
-        Set<String> common = new HashSet<String>();
-        Set<String> proper = new HashSet<String>();
-        List<WiseWord> words = new ArrayList<WiseWord>();
+        Set<String> common = new HashSet<>();
+        Set<String> proper = new HashSet<>();
+        List<WiseWord> words = new ArrayList<>();
         String[] wordArray = text.split("\\s+");
         for (String wordString : wordArray) {
             if (!wordString.isEmpty()) {
@@ -86,7 +86,7 @@ public class TextAnalyzerWise implements TextAnalyzer {
     }
 
     private Map<String, Integer> getWordOccurrencies(List<WiseWord> words) {
-        Map<String, Integer> wordOccurrencies = new TreeMap<String, Integer>();
+        Map<String, Integer> wordOccurrencies = new TreeMap<>();
         for (WiseWord word : words) {
             String wordString = word.getResult();
             wordOccurrencies.put(wordString, wordOccurrencies.containsKey(wordString) ? wordOccurrencies.get(wordString) + 1 : 1);
@@ -95,7 +95,7 @@ public class TextAnalyzerWise implements TextAnalyzer {
     }
 
     private static class WiseWord {
-        private static enum Type {
+        private enum Type {
             UNDEFINED, COMMON, PROPER, STRANGE
         }
 

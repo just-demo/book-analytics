@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.Map;
 
 import edu.self.model.WordInfo;
-import edu.self.model.user.UserWord;
+import edu.self.model.UserWord;
 
 public interface TextAnalyzer {
-    Map<String, Integer> getWordOccurrencies(String text);
+    Map<String, Integer> getWordOccurrences(String text);
 
     Map<String, WordInfo> getWordStatistics(String text);
 

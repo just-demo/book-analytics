@@ -4,21 +4,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class TextUtils {
-    public static Set<String> getWords(String text) {
-        Set<String> words = new HashSet<String>();
-        for (String word : text.split("\\s+")) {
-            if (!word.isEmpty()) {
-                words.add(word);
-            }
-        }
-        return words;
-    }
 
     public static String trimNonLetters(String string) {
         //return string.replaceAll("^[^a-zA-Z]*(.*?)[^a-zA-Z]*$", "$1");
-        int legth = string.length();
+        int length = string.length();
         int start = 0;
-        int end = legth;
+        int end = length;
         while (start < end && !Character.isLetter(string.charAt(start))) {
             ++start;
         }
@@ -26,7 +17,7 @@ public class TextUtils {
         while (start < end && !Character.isLetter(string.charAt(end - 1))) {
             --end;
         }
-        return (start > 0 || end < legth) ? string.substring(start, end) : string;
+        return (start > 0 || end < length) ? string.substring(start, end) : string;
     }
 
     public static String cutEnding(String string) {
@@ -53,15 +44,15 @@ public class TextUtils {
     }
 
     public static Set<String> getAllCases(String... strings) {
-        Set<String> cases = new HashSet<String>();
+        Set<String> cases = new HashSet<>();
         for (String string : strings) {
             cases.addAll(getAllCases(string));
         }
         return cases;
     }
 
-    public static Set<String> getAllCases(String string) {
-        Set<String> cases = new HashSet<String>();
+    private static Set<String> getAllCases(String string) {
+        Set<String> cases = new HashSet<>();
         if (string.length() == 0) {
             cases.add("");
         } else {
