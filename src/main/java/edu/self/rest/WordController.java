@@ -1,7 +1,8 @@
-package edu.self.web;
+package edu.self.rest;
 
 import edu.self.services.TranslationService;
 import edu.self.services.UserPreferenceService;
+import org.springframework.stereotype.Component;
 
 import javax.inject.Singleton;
 import javax.ws.rs.*;
@@ -11,7 +12,7 @@ import java.util.List;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
-@Singleton
+@Component
 @Path("/word")
 public class WordController {
     private UserPreferenceService userPreferenceService = new UserPreferenceService();

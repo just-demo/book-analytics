@@ -1,13 +1,8 @@
 package edu.self.services.text;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
 import edu.self.utils.TextUtils;
+
+import java.util.*;
 
 public class TextAnalyzerWise implements TextAnalyzer {
     @Override

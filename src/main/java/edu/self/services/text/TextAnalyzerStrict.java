@@ -1,18 +1,18 @@
 package edu.self.services.text;
 
 import edu.self.utils.TextUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+@Service
 public class TextAnalyzerStrict implements TextAnalyzer {
     private static final String[] ignorableSuffixes = TextUtils.getAllCases("'s", "'d", "'ll", "'re", "'ve", "n't").toArray(new String[]{});
-    private Set<String> managedWords;
-
-    public TextAnalyzerStrict(Set<String> managedWords) {
-        this.managedWords = managedWords;
-    }
+    @Autowired
+    private Set<String> words;
 
     @Override
     public Map<String, Integer> getWordOccurrences(String text) {
@@ -96,7 +96,7 @@ public class TextAnalyzerStrict implements TextAnalyzer {
     }
 
     private boolean isManagedWord(String word) {
-        return managedWords.contains(word);
+        return words.contains(word);
     }
 
     private String getManagedWord(String word) {

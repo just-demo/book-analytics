@@ -1,15 +1,15 @@
-package edu.self.web;
+package edu.self.rest;
 
 import edu.self.services.GroupService;
 import edu.self.services.TranslationService;
 import edu.self.services.UserPreferenceService;
 import edu.self.services.text.TextAnalyzer;
-import edu.self.services.text.TextAnalyzerStrict;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-import javax.inject.Singleton;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -18,39 +18,36 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static edu.self.utils.FileUtils.readResourceFile;
 import static edu.self.utils.JsonUtils.toJson;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toSet;
+import static java.util.Arrays.asList;
+import static java.util.Comparator.comparing;
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toMap;
 
-@Singleton
+@Component
 @Path("/book")
 public class BookController {
-
+    @Autowired
     private TextAnalyzer textAnalyzer;
+
+    @Autowired
     private GroupService groupService;
+
+    @Autowired
     private TranslationService translationService;
+
+    @Autowired
     private UserPreferenceService userPreferenceService;
 
-    private Set<String> managedWords;
-
-    public BookController() throws IOException {
-        managedWords = stream(readResourceFile("words.txt").split("\n"))
-                .filter(StringUtils::isNotEmpty)
-                .collect(toSet());
-        groupService = new GroupService();
-        userPreferenceService = new UserPreferenceService();
-        textAnalyzer = new TextAnalyzerStrict(managedWords);
-        translationService = new TranslationService();
-    }
+    @Autowired
+    private Set<String> words;
 
     @GET
     @Path("/")
     @Produces(MediaType.TEXT_HTML)
     public Response bookInput() {
-        //Viewable does not work locally
-        //Viewable template = new Viewable("/WEB-INF/jsp/book_input.jsp");
         String template = getInputPage();
         return Response.status(200).entity(template).build();
     }
@@ -105,7 +102,7 @@ public class BookController {
                         wordOccurrences.get(word), // occurrence
                         isTranslationSaved ? 1 : 0, // is translation saved
                         userPreferenceService.isIgnorable(word) ? 1 : 0, // ignorable
-                        managedWords.contains(word) ? 1 : 0, // is managed
+                        words.contains(word) ? 1 : 0, // is managed
                         translationService.getTranslations(word), //all translations
                 });
             }
@@ -133,17 +130,13 @@ public class BookController {
     @Path("/textToBook")
     @Produces("text/html")
     public String textToBook(@FormParam("text") String text) {
-        Map<String, Integer> wordOccurrencies = textAnalyzer.getWordOccurrences(text);
-        Map<String, List<String>> translations = new HashMap<>();
-        for (String word : wordOccurrencies.keySet()) {
-            translations.put(word.toLowerCase(), translationService.getTranslations(word));
-        }
-
+        Map<String, Integer> wordOccurrences = textAnalyzer.getWordOccurrences(text);
+        Map<String, List<String>> translations = wordOccurrences.keySet().stream()
+                .collect(toMap(String::toLowerCase, translationService::getTranslations));
         String wordsPattern = makePattern(translations.keySet());
-        System.out.println(wordsPattern);
-        text = Pattern.compile(wordsPattern, Pattern.CASE_INSENSITIVE).matcher(text).replaceAll("<span>$1</span>");
-
-        text = text /*.replaceAll(wordsPattern, "<span>$1</span>")*/.replaceAll("( )(?= )", "&nbsp;").replaceAll("\\n", "<br/>\n");
+        String textPrepared = Pattern.compile(wordsPattern, CASE_INSENSITIVE).matcher(text).replaceAll("<span>$1</span>")
+                .replaceAll("( )(?= )", "&nbsp;")
+                .replaceAll("\\n", "<br/>\n");
         return "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" +
                 "<html>" +
                 "<head>" +
@@ -203,21 +196,17 @@ public class BookController {
                 "  </script>" +
                 "</head>" +
                 "<body onload='init();'>" +
-                "  <div id='text'>" + text + "</div>" +
+                "  <div id='text'>" + textPrepared + "</div>" +
                 "  <div id='translation'></div>" +
                 "</body>" +
                 "</html>";
     }
 
-    private String makePattern(Set<String> wordsSet) {
-        List<String> words = new ArrayList<>(wordsSet);
-        words.sort((o1, o2) -> o2.length() - o1.length());
-
-        for (int i = words.size() - 1; i > -1; i--) {
-            words.set(i, Pattern.quote(words.get(i)));
-        }
-
-        return "(" + StringUtils.join(words, "|") + ")";
+    private String makePattern(Set<String> words) {
+        return "(" + words.stream()
+                .sorted(comparing(String::length).reversed())
+                .map(Pattern::quote)
+                .collect(joining("|")) + ")";
     }
 
     @GET
@@ -238,8 +227,6 @@ public class BookController {
     private String getResultPage(String result) {
         return getPage(
                 "<script type=\"text/javascript\">" +
-                        //in jsp template it would be window.parent.postUpload(${it});
-                        //additionally <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%> directive would be added
                         "window.parent.postUpload(" + result + ");" +
                         "</script>"
         );

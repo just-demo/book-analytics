@@ -21,7 +21,7 @@ public class TextUtils {
     }
 
     public static String cutEnding(String string) {
-        return string.endsWith("'s") ? string.substring(0, string.length() - 2) : string;
+        return cutSuffix(string, "'s");
     }
 
     public static String cutSuffix(String string, String... suffixes) {

@@ -3,6 +3,8 @@ package edu.self.services;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -15,18 +17,10 @@ import static edu.self.utils.FileUtils.readResourceFile;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 
+@Service
 public class TranslationService {
+    @Autowired
     private Map<String, List<String>> translations;
-
-    public TranslationService() {
-        String groupsJson = readResourceFile("translations.json");
-        try {
-            translations = new ObjectMapper().readValue(groupsJson, new TypeReference<Map<String, List<String>>>() {
-            });
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
 
     public String translate(String text) {
         return ofNullable(text)
