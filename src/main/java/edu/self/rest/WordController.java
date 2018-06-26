@@ -2,47 +2,41 @@ package edu.self.rest;
 
 import edu.self.services.TranslationService;
 import edu.self.services.UserPreferenceService;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
-import javax.inject.Singleton;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
 import java.util.List;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
-@Component
-@Path("/word")
+@RestController
+@RequestMapping("/rest/word")
 public class WordController {
-    private UserPreferenceService userPreferenceService = new UserPreferenceService();
-    private TranslationService translationService = new TranslationService();
+    @Autowired
+    private TranslationService translationService;
 
-    @POST
-    @Path("/translate")
-    //@Produces(MediaType.TEXT_PLAIN) //APPLICATION_JSON)
-    public void setTranslation(@FormParam("text") String text, @FormParam("translation") String translation) {
-        userPreferenceService.setTranslation(text, translation);
-    }
+    @Autowired
+    private UserPreferenceService userPreferenceService;
 
-    @POST
-    @Path("/ignore")
-    //@Produces(MediaType.APPLICATION_JSON)
-    public void ignore(@FormParam("text") String text, @FormParam("ignorable") Boolean ignorable) {
-        userPreferenceService.setIgnorable(text, ignorable);
-    }
-
-    @GET
-    @Path("/translate")
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<String> getTranslation(@QueryParam("text") String text) {
+    @GetMapping("/translate")
+    public List<String> getTranslation(@RequestParam("text") String text) {
         String translation = translationService.translate(text);
         return translation.isEmpty() ? emptyList() : singletonList(translation);
     }
 
-    @GET
-    @Path("/test")
-    @Produces("text/plain")
+    @PostMapping("/translate")
+    public void setTranslation(@RequestParam("text") String text, @RequestParam("translation") String translation) {
+        userPreferenceService.setTranslation(text, translation);
+    }
+
+    @PostMapping("/ignore")
+    public void ignore(@RequestParam("text") String text, @RequestParam("ignorable") Boolean ignorable) {
+        userPreferenceService.setIgnorable(text, ignorable);
+    }
+
+    @GetMapping(path = "/test", produces = TEXT_PLAIN_VALUE)
     public String test() {
         return "Word Test";
     }

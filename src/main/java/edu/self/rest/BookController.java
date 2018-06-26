@@ -4,30 +4,25 @@ import edu.self.services.GroupService;
 import edu.self.services.TranslationService;
 import edu.self.services.UserPreferenceService;
 import edu.self.services.text.TextAnalyzer;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 import java.util.regex.Pattern;
 
 import static edu.self.utils.JsonUtils.toJson;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Arrays.asList;
 import static java.util.Comparator.comparing;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
+import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
+import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
-@Component
-@Path("/book")
+@RestController
+@RequestMapping("/rest/book")
 public class BookController {
     @Autowired
     private TextAnalyzer textAnalyzer;
@@ -44,27 +39,41 @@ public class BookController {
     @Autowired
     private Set<String> words;
 
-    @GET
-    @Path("/")
-    @Produces(MediaType.TEXT_HTML)
-    public Response bookInput() {
-        String template = getInputPage();
-        return Response.status(200).entity(template).build();
+    @GetMapping(path = "", produces = TEXT_HTML_VALUE)
+    public String bookInput() {
+        return getInputPage();
     }
 
-    @POST
-    @Path("/")
-    @Consumes(MediaType.MULTIPART_FORM_DATA)
-    // @Produces(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_HTML)
-    public Response parseFile(@FormDataParam("file") InputStream file) throws IOException {
-        String text = IOUtils.toString(file, UTF_8);
+    @PostMapping(path = "", produces = TEXT_HTML_VALUE)
+    public String parseFile(@RequestParam("file") MultipartFile file) throws IOException {
+        String text = new String(file.getBytes(), UTF_8);
         List<List<Object[]>> groupPrepared = prepareGroups(text);
         String jsonString = toJson(groupPrepared);
-        //Viewable does not work locally
-        //Viewable template = new Viewable("/WEB-INF/jsp/book_result.jsp", jsonString);
-        String template = getResultPage(jsonString);
-        return Response.status(200).entity(template).build();
+        return getResultPage(jsonString);
+    }
+
+    @PostMapping(path = "/textToBook", produces = TEXT_HTML_VALUE)
+    public String textToBook(@RequestParam("text") String text) {
+        Map<String, Integer> wordOccurrences = textAnalyzer.getWordOccurrences(text);
+        Map<String, List<String>> translations = wordOccurrences.keySet().stream()
+                .collect(toMap(String::toLowerCase, translationService::getTranslations));
+        String wordsPattern = makePattern(translations.keySet());
+        String textPrepared = Pattern.compile(wordsPattern, CASE_INSENSITIVE).matcher(text).replaceAll("<span>$1</span>")
+                .replaceAll("( )(?= )", "&nbsp;")
+                .replaceAll("\\n", "<br/>\n");
+        return gettextToBookResultPage(textPrepared, translations);
+    }
+
+    @GetMapping(path = "/test", produces = TEXT_PLAIN_VALUE)
+    public String test() {
+        return "Book Test";
+    }
+
+    private String makePattern(Set<String> words) {
+        return "(" + words.stream()
+                .sorted(comparing(String::length).reversed())
+                .map(Pattern::quote)
+                .collect(joining("|")) + ")";
     }
 
     private List<List<Object[]>> prepareGroups(String text) {
@@ -126,17 +135,8 @@ public class BookController {
         }
     }
 
-    @POST
-    @Path("/textToBook")
-    @Produces("text/html")
-    public String textToBook(@FormParam("text") String text) {
-        Map<String, Integer> wordOccurrences = textAnalyzer.getWordOccurrences(text);
-        Map<String, List<String>> translations = wordOccurrences.keySet().stream()
-                .collect(toMap(String::toLowerCase, translationService::getTranslations));
-        String wordsPattern = makePattern(translations.keySet());
-        String textPrepared = Pattern.compile(wordsPattern, CASE_INSENSITIVE).matcher(text).replaceAll("<span>$1</span>")
-                .replaceAll("( )(?= )", "&nbsp;")
-                .replaceAll("\\n", "<br/>\n");
+
+    private String gettextToBookResultPage(String textPrepared, Map<String, List<String>> translations) {
         return "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" +
                 "<html>" +
                 "<head>" +
@@ -202,20 +202,6 @@ public class BookController {
                 "</html>";
     }
 
-    private String makePattern(Set<String> words) {
-        return "(" + words.stream()
-                .sorted(comparing(String::length).reversed())
-                .map(Pattern::quote)
-                .collect(joining("|")) + ")";
-    }
-
-    @GET
-    @Path("/test")
-    @Produces("text/plain")
-    public String test() {
-        return "Book Test";
-    }
-
     private String getInputPage() {
         return getPage(
                 "<form action=\"\" method=\"POST\" enctype=\"multipart/form-data\">" +
@@ -245,6 +231,4 @@ public class BookController {
                         "</body>" +
                         "</html>";
     }
-
-
 }

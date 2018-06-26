@@ -34,6 +34,4 @@ public class AppConfig {
         return fromJson(readResourceFile("translations.json"), new TypeReference<Map<String, List<String>>>() {
         });
     }
-
-
 }
