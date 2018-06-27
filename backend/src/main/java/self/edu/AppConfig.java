@@ -1,4 +1,4 @@
-package edu.self;
+package self.edu;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.context.annotation.Bean;
@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static edu.self.utils.FileUtils.readResourceFile;
-import static edu.self.utils.JsonUtils.fromJson;
+import static self.edu.utils.FileUtils.readResourceFile;
+import static self.edu.utils.JsonUtils.fromJson;
 
 @Configuration
 public class AppConfig {

@@ -1,4 +1,4 @@
-package edu.self.utils;
+package self.edu.utils;
 
 import org.apache.commons.io.IOUtils;
 

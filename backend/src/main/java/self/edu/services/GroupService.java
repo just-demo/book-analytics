@@ -1,4 +1,4 @@
-package edu.self.services;
+package self.edu.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

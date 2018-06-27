@@ -1,6 +1,6 @@
-package edu.self.services.text;
+package self.edu.services.text;
 
-import edu.self.utils.TextUtils;
+import self.edu.utils.TextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

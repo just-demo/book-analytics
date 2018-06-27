@@ -1,4 +1,4 @@
-package edu.self.utils;
+package self.edu.utils;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -1,4 +1,4 @@
-package edu.self.services.text;
+package self.edu.services.text;
 
 import java.util.Map;
 
