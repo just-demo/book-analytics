@@ -1,4 +1,4 @@
-package edu.self;
+package edu.self.config;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.context.annotation.Bean;
