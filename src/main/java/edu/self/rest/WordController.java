@@ -1,7 +1,7 @@
-package self.edu.rest;
+package edu.self.rest;
 
-import self.edu.services.TranslationService;
-import self.edu.services.UserPreferenceService;
+import edu.self.services.TranslationService;
+import edu.self.services.UserPreferenceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,4 +1,4 @@
-package self.edu.services;
+package edu.self.services;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,11 +6,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static edu.self.utils.FileUtils.readResourceFile;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 

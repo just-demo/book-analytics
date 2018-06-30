@@ -1,9 +1,9 @@
-package self.edu.rest;
+package edu.self.rest;
 
-import self.edu.services.GroupService;
-import self.edu.services.TranslationService;
-import self.edu.services.UserPreferenceService;
-import self.edu.services.text.TextAnalyzer;
+import edu.self.services.GroupService;
+import edu.self.services.TranslationService;
+import edu.self.services.UserPreferenceService;
+import edu.self.services.text.TextAnalyzer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static self.edu.utils.JsonUtils.toJson;
+import static edu.self.utils.JsonUtils.toJson;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Comparator.comparing;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;

@@ -1,4 +1,4 @@
-package self.edu.services;
+package edu.self.services;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang3.NotImplementedException;
@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-import static self.edu.utils.FileUtils.readResourceFile;
-import static self.edu.utils.JsonUtils.fromJson;
+import static edu.self.utils.FileUtils.readResourceFile;
+import static edu.self.utils.JsonUtils.fromJson;
 
 @Service
 public class UserPreferenceService {

@@ -1,4 +1,4 @@
-package self.edu.utils;
+package edu.self.utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,6 +6,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.Set;
+
+import static edu.self.utils.FileUtils.readResourceFile;
 
 public class JsonUtils {
     private static final ObjectMapper MAPPER = buildMapper();

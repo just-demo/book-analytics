@@ -1,6 +1,6 @@
-package self.edu.services.text;
+package edu.self.services.text;
 
-import self.edu.utils.TextUtils;
+import edu.self.utils.TextUtils;
 
 import java.util.*;
 
