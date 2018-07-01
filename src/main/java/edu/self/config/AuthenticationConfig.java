@@ -50,7 +50,7 @@ public class AuthenticationConfig extends GlobalAuthenticationConfigurerAdapter 
     public static void main(String[] args) {
         //true Authorization: Basic dGVzdDpwd2Q=
         //false Authorization: Basic dGVzdDpwd2Qy
-        String up = "test:pwd2";
+        String up = "test:pwd";
         System.out.println(Base64.encodeBase64String(up.getBytes()));
     }
 }

@@ -17,8 +17,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .httpBasic()
                 .and()
                 .csrf().disable()
+//                .headers().frameOptions().()
+//                .and()
+                .requestMatchers()
+                .antMatchers("/users/**")
+                .and()
                 .authorizeRequests()
                 .antMatchers(POST, "/users").permitAll()
+//                .antMatchers("/auth").permitAll()
                 .anyRequest().authenticated()
         ;
     }

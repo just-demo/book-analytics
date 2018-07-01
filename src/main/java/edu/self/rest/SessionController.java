@@ -25,6 +25,7 @@ public class SessionController {
         if (!credentialRepository.existsByUsernameAndPassword(userLogin.getUsername(), md5Hex(userLogin.getPassword()))) {
             throw new IllegalArgumentException("Login failed");
         }
+        // TODO: make it return auth header
         return startSession(userLogin.getUsername());
         // TODO: replace with existsByUsernameAndPassword
 //        return userRepository.findById(userLogin.getUsername())
