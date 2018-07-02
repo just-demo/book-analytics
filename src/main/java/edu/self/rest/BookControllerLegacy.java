@@ -1,36 +1,30 @@
 package edu.self.rest;
 
-import edu.self.dto.Statistics;
-import edu.self.dto.StatisticsGroup;
 import edu.self.services.GroupService;
 import edu.self.services.TranslationService;
 import edu.self.services.UserPreferenceService;
 import edu.self.services.text.TextAnalyzer;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static edu.self.utils.JsonUtils.toJson;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Comparator.comparing;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toMap;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
-import static org.springframework.web.cors.CorsConfiguration.ALL;
 
-@CrossOrigin(ALL)
+@Deprecated
 @RestController
-@RequestMapping("/books")
-public class BookController {
+@RequestMapping("/rest/book")
+public class BookControllerLegacy {
     @Autowired
     private TextAnalyzer textAnalyzer;
 
@@ -51,10 +45,12 @@ public class BookController {
         return getInputPage();
     }
 
-    @PostMapping("/upload")
-    public Object uploadBook(@RequestParam("file") MultipartFile file) throws IOException {
+    @PostMapping(path = "", produces = TEXT_HTML_VALUE)
+    public String parseFile(@RequestParam("file") MultipartFile file) throws IOException {
         String text = new String(file.getBytes(), UTF_8);
-        return prepareGroups(text);
+        List<List<Object[]>> groupPrepared = prepareGroups(text);
+        String jsonString = toJson(groupPrepared);
+        return getResultPage(jsonString);
     }
 
     @PostMapping(path = "/textToBook", produces = TEXT_HTML_VALUE)
@@ -81,27 +77,65 @@ public class BookController {
                 .collect(joining("|")) + ")";
     }
 
-    private List<List<Pair<String, Long>>> prepareGroups(String text) {
+    private List<List<Object[]>> prepareGroups(String text) {
         Map<String, Long> wordOccurrences = textAnalyzer.getWordOccurrences(text);
         Collection<Collection<String>> groups = groupService.group(wordOccurrences.keySet());
-
-        return groups.stream()
-                .map(group -> group.stream()
-                        .map(word -> Pair.of(word, wordOccurrences.get(word)))
-                        .sorted(comparing(this::getOccurrence).reversed())
-                        .collect(toList())
-                ).sorted(comparing(this::sumOccurrence).reversed()).collect(toList());
+        // wrap and sort
+        List<SortWrapper<List<SortWrapper<String>>>> groupWrappers = new ArrayList<>();
+        for (Collection<String> group : groups) {
+            long total = 0;
+            List<SortWrapper<String>> wordWrappers = new ArrayList<>();
+            for (String word : group) {
+                Long count = wordOccurrences.get(word);
+                wordWrappers.add(new SortWrapper<>(word, count));
+                total += count;
+            }
+            Collections.sort(wordWrappers);
+            groupWrappers.add(new SortWrapper<>(wordWrappers, total));
+        }
+        Collections.sort(groupWrappers);
+        // unwrap and fill data
+        List<List<Object[]>> groupPrepared = new ArrayList<>();
+        for (SortWrapper<List<SortWrapper<String>>> groupWrapper : groupWrappers) {
+            List<Object[]> group = new ArrayList<>();
+            for (SortWrapper<String> wordWrapper : groupWrapper.value) {
+                String word = wordWrapper.value;
+                String translation = userPreferenceService.getTranslation(word);
+                boolean isTranslationSaved = true;
+                if (translation == null) {
+                    translation = translationService.translate(word);
+                    isTranslationSaved = false;
+                }
+                group.add(new Object[]{
+                        word, // text
+                        translation, // translation
+                        wordOccurrences.get(word), // occurrence
+                        isTranslationSaved ? 1 : 0, // is translation saved
+                        userPreferenceService.isIgnorable(word) ? 1 : 0, // ignorable
+                        words.contains(word) ? 1 : 0, // is managed
+                        translationService.getTranslations(word), //all translations
+                });
+            }
+            groupPrepared.add(group);
+        }
+        return groupPrepared;
     }
 
-    private long getOccurrence(Pair<String, Long> item) {
-        return item.getValue();
+    private class SortWrapper<T> implements Comparable<SortWrapper<T>> {
+        private T value;
+        private Long count;
+
+        SortWrapper(T value, Long count) {
+            this.value = value;
+            this.count = count;
+        }
+
+        @Override
+        public int compareTo(SortWrapper<T> o) {
+            return -count.compareTo(o.count);
+        }
     }
 
-    private long sumOccurrence(Collection<Pair<String, Long>> items) {
-        return items.stream()
-                .mapToLong(Pair::getValue)
-                .sum();
-    }
 
     private String gettextToBookResultPage(String textPrepared, Map<String, List<String>> translations) {
         return "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">" +

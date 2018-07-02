@@ -6,7 +6,7 @@ import java.util.*;
 
 public class TextAnalyzerWise implements TextAnalyzer {
     @Override
-    public Map<String, Integer> getWordOccurrences(String text) {
+    public Map<String, Long> getWordOccurrences(String text) {
         List<WiseWord> words = getWordsPrepared(text);
         return getWordOccurrences(words);
     }
@@ -38,8 +38,8 @@ public class TextAnalyzerWise implements TextAnalyzer {
         return words;
     }
 
-    private Map<String, Integer> getWordOccurrences(List<WiseWord> words) {
-        Map<String, Integer> wordOccurrences = new TreeMap<>();
+    private Map<String, Long> getWordOccurrences(List<WiseWord> words) {
+        Map<String, Long> wordOccurrences = new TreeMap<>();
         for (WiseWord word : words) {
             String wordString = word.getResult();
             wordOccurrences.put(wordString, wordOccurrences.containsKey(wordString) ? wordOccurrences.get(wordString) + 1 : 1);

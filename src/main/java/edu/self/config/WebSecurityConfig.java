@@ -11,12 +11,14 @@ import static org.springframework.http.HttpMethod.PUT;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .httpBasic()
                 .and()
                 .csrf().disable()
+//                .cors().configurationSource(allowAllCorsConfiguration())
 //                .headers().frameOptions().()
 //                .and()
                 .requestMatchers()
@@ -28,6 +30,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated()
         ;
     }
+
+//    @Bean
+//    public CorsConfigurationSource allowAllCorsConfiguration() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.setAllowedOrigins(singletonList(ALL));
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
+//    }
 
     protected void configure2(HttpSecurity http) throws Exception {
         http
@@ -49,7 +60,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .and()
 //                .logout()
 //                .permitAll()
-        ;
     }
 
 //    @Bean

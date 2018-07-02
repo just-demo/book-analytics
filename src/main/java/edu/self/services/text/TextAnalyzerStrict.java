@@ -15,9 +15,9 @@ public class TextAnalyzerStrict implements TextAnalyzer {
     private Set<String> words;
 
     @Override
-    public Map<String, Integer> getWordOccurrences(String text) {
-        Map<String, Integer> words = new HashMap<>();
-        Map<String, Integer> nonManagedWords = new HashMap<>();
+    public Map<String, Long> getWordOccurrences(String text) {
+        Map<String, Long> words = new HashMap<>();
+        Map<String, Long> nonManagedWords = new HashMap<>();
         Map<String, String> aliases = new HashMap<>();
         for (String word : text.split("\\s+")) {
             if (word.length() > 1) {
@@ -50,7 +50,7 @@ public class TextAnalyzerStrict implements TextAnalyzer {
         }
     }
 
-    private void addWords(Map<String, Integer> holder, String... words) {
+    private void addWords(Map<String, Long> holder, String... words) {
         for (String word : words) {
             if (!word.isEmpty()) {
                 holder.put(word, holder.containsKey(word) ? holder.get(word) + 1 : 1);
