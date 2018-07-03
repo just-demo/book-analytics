@@ -1,28 +1,31 @@
 package edu.self.rest;
 
-import edu.self.dto.Statistics;
-import edu.self.dto.StatisticsGroup;
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.type.TypeReference;
 import edu.self.services.GroupService;
 import edu.self.services.TranslationService;
 import edu.self.services.UserPreferenceService;
 import edu.self.services.text.TextAnalyzer;
+import edu.self.utils.JsonUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static edu.self.utils.JsonUtils.toJson;
+import static java.lang.System.currentTimeMillis;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Comparator.comparing;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static java.util.stream.Collectors.*;
+import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.springframework.http.MediaType.TEXT_HTML_VALUE;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 import static org.springframework.web.cors.CorsConfiguration.ALL;
@@ -56,6 +59,20 @@ public class BookController {
         String text = new String(file.getBytes(), UTF_8);
         return prepareGroups(text);
     }
+//
+//    public static void main(String[] args) throws IOException {
+//        String[] words = readFileToString(Paths.get("/Users/user/Documents/test-book-big.txt").toFile(), UTF_8).split("\\s+");
+//        List<String> wordsDist = Arrays.stream(words).distinct().collect(toList());
+//        System.out.println(words.length);
+//        System.out.println(JsonUtils.toJson(wordsDist).length());
+//        System.out.println(readFileToString(Paths.get("/Users/user/Documents/test-book-big.txt").toFile(), UTF_8).length() / 1024);
+//        System.out.println(readFileToString(Paths.get("/Users/user/Work/projects/book-analytics/src/main/resources/translations.json").toFile(), UTF_8).length() / 1024);
+//        Map<String, List<String>> filtered = JsonUtils.fromJson(readFileToString(Paths.get("/Users/user/Work/projects/book-analytics/src/main/resources/translations.json").toFile(), UTF_8), new TypeReference<Map<String, List<String>>>() {
+//        });
+//        filtered.keySet().retainAll(wordsDist);
+//        System.out.println(JsonUtils.toJson(filtered).length() / 1024);
+//
+//    }
 
     @PostMapping(path = "/textToBook", produces = TEXT_HTML_VALUE)
     public String textToBook(@RequestParam("text") String text) {
@@ -69,6 +86,31 @@ public class BookController {
         return gettextToBookResultPage(textPrepared, translations);
     }
 
+    public static void main(String[] args) throws IOException {
+        long start = currentTimeMillis();
+        Pattern p = Pattern.compile("([a-zA-Z'\\-]+|[^a-zA-Z'\\-]+)");
+//        String text = "This  is a text! I'm happy to say that. \nDash-valued!\t";
+
+        String text = readFileToString(Paths.get("/Users/user/Documents/test-book-big.txt").toFile(), UTF_8);
+
+
+        Matcher m = p.matcher(text);
+        List<String> list = new ArrayList<>();
+        while (m.find()) {
+            list.add(m.group());
+        }
+        System.out.println("======== " + (currentTimeMillis() - start) / 1000. + " ======");
+        System.out.println(JsonUtils.toJson(list));
+    }
+
+    /*
+    var text = "This  is a text! I'm happy to say that. \nDash-valued!\t";
+var p = /([a-z'\-]+|[^a-z'\-]+)/gi;
+var m;
+while (m = p.exec(text)) {console.log(JSON.stringify(m[1]));}
+
+     */
+
     @GetMapping(path = "/test", produces = TEXT_PLAIN_VALUE)
     public String test() {
         return "Book Test";
@@ -81,25 +123,24 @@ public class BookController {
                 .collect(joining("|")) + ")";
     }
 
-    private List<List<Pair<String, Long>>> prepareGroups(String text) {
+    private List<Map<String, Long>> prepareGroups(String text) {
         Map<String, Long> wordOccurrences = textAnalyzer.getWordOccurrences(text);
         Collection<Collection<String>> groups = groupService.group(wordOccurrences.keySet());
-
         return groups.stream()
                 .map(group -> group.stream()
                         .map(word -> Pair.of(word, wordOccurrences.get(word)))
                         .sorted(comparing(this::getOccurrence).reversed())
-                        .collect(toList())
-                ).sorted(comparing(this::sumOccurrence).reversed()).collect(toList());
+                        .collect(toMap(Pair::getKey, Pair::getValue, (v1, v2) -> v1, LinkedHashMap::new))
+                ).sorted(comparing(this::sumOccurrence).reversed().thenComparing(Map::size)).collect(toList());
     }
 
     private long getOccurrence(Pair<String, Long> item) {
         return item.getValue();
     }
 
-    private long sumOccurrence(Collection<Pair<String, Long>> items) {
-        return items.stream()
-                .mapToLong(Pair::getValue)
+    private long sumOccurrence(Map<String, Long> items) {
+        return items.values().stream()
+                .mapToLong(Long::longValue)
                 .sum();
     }
 
