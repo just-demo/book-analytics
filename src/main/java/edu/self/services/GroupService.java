@@ -10,12 +10,16 @@ import java.util.*;
 public class GroupService {
     @Autowired
     @Qualifier("groups")
-    private Map<String, Set<String>> groups;
+    private Set<Set<String>> groups;
+
+    @Autowired
+    @Qualifier("wordGroups")
+    private Map<String, Set<String>> wordGroups;
 
     public Collection<Collection<String>> group(Collection<String> collection) {
         Map<Object, Collection<String>> groupBuffer = new HashMap<>();
         for (String word : collection) {
-            Object identifier = groups.get(word);
+            Object identifier = wordGroups.get(word);
             if (identifier == null) {
                 identifier = word;
             }
@@ -23,5 +27,9 @@ public class GroupService {
             group.add(word);
         }
         return groupBuffer.values();
+    }
+
+    public Set<Set<String>> getGroups() {
+        return groups;
     }
 }

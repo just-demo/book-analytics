@@ -105,7 +105,7 @@ public class BookController {
 
     /*
     var text = "This  is a text! I'm happy to say that. \nDash-valued!\t";
-var p = /([a-z'\-]+|[^a-z'\-]+)/gi;
+var p = /([a-z'\-]+|[^a-z'\-\n]+|\n)/gi;
 var m;
 while (m = p.exec(text)) {console.log(JSON.stringify(m[1]));}
 

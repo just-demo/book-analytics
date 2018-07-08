@@ -28,4 +28,9 @@ public class TranslationController {
         translations.values().removeIf(CollectionUtils::isEmpty);
         return translations;
     }
+
+    @GetMapping
+    public Map<String, List<String>> getTranslations() {
+        return translationService.getTranslations();
+    }
 }
