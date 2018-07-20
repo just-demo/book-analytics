@@ -23,12 +23,13 @@ public class AuthenticationController {
     private PasswordEncoder passwordEncoder;
 
     @PutMapping
-    public void register(@RequestBody Credential credential) {
+    public Map<String, String> register(@RequestBody Credential credential) {
         if (credentialRepository.existsById(credential.getUsername())) {
             throw new IllegalArgumentException("Such user already exists");
         }
         credential.setPassword(passwordEncoder.encode(credential.getPassword()));
         credentialRepository.save(credential);
+        return buildAuthResponse(credential);
     }
 
     @PostMapping
@@ -39,6 +40,10 @@ public class AuthenticationController {
         if (!loginSuccessful) {
             throw new IllegalArgumentException("Login failed");
         }
+        return buildAuthResponse(credential);
+    }
+
+    private Map<String, String> buildAuthResponse(Credential credential) {
         return singletonMap(
                 "Authorization",
                 "Basic " + encodeBase64String((credential.getUsername() + ":" + credential.getPassword()).getBytes())
