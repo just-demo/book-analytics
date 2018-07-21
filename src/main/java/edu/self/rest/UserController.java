@@ -1,5 +1,6 @@
 package edu.self.rest;
 
+import edu.self.model.Book;
 import edu.self.model.User;
 import edu.self.repositories.CredentialRepository;
 import edu.self.repositories.UserRepository;
@@ -7,10 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toSet;
 import static org.springframework.web.cors.CorsConfiguration.ALL;
 
 @CrossOrigin(ALL)
@@ -37,98 +39,42 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public User patchUser(@PathVariable("userId") String userId, @RequestBody User userPatch) {
-        // TODO: consider selected of type [{en: word, ru: translation}, ...]
-        // TODO: consider book of type {name:..., content:..., language: en}
-        // TODO: configure mapKeyDotReplacement or do not use user inputs as keys
+    public void addUserData(@PathVariable("userId") String userId, @RequestBody User userPatch) {
         User user = userRepository.findById(userId).orElseGet(() -> new User(userId));
-        merge(userPatch, user);
-        return userRepository.save(user);
+        add(user, userPatch);
+        userRepository.save(user);
+    }
+
+    @PatchMapping("/{userId}/remove")
+    public void removeUserData(@PathVariable("userId") String userId, @RequestBody User userRemove) {
+        User user = userRepository.findById(userId).orElseGet(() -> new User(userId));
+        remove(user, userRemove);
+        userRepository.save(user);
     }
 
     @GetMapping("/{userId}/books/{bookId}")
-    public Optional<String> getBook(
-            @PathVariable("userId") String userId,
-            @PathVariable("bookId") String bookId
-    ) {
+    public Optional<Book> getBook(@PathVariable("userId") String userId, @PathVariable("bookId") String bookId) {
         // TODO: fetch book from a separate collection
-        return ofNullable(getUser(userId).getBooks().get(bookId));
-    }
-
-    @PutMapping("/{userId}/books/{bookId}")
-    public void saveBook(
-            @PathVariable("userId") String userId,
-            @PathVariable("bookId") String bookId,
-            @RequestBody String text
-    ) {
-        User user = getUser(userId);
-        // TODO: put book into a separate collection
-        user.getBooks().put(bookId, text);
-        userRepository.save(user);
-    }
-
-    @DeleteMapping("/{userId}/books/{bookId}")
-    public void removeBook(
-            @PathVariable("userId") String userId,
-            @PathVariable("bookId") String bookId
-    ) {
-        User user = getUser(userId);
-        // TODO: delete book from a separate collection
-        user.getBooks().put(bookId, null);
-        userRepository.save(user);
-    }
-
-    @PutMapping("/{userId}/selected/{word}/{translation}")
-    public void putSelected(
-            @PathVariable("userId") String userId,
-            @PathVariable("word") String word,
-            @PathVariable("translation") String translation
-    ) {
-        User user = getUser(userId);
-        user.getSelected().computeIfAbsent(word, ignored -> new HashSet<>()).add(translation);
-        userRepository.save(user);
-    }
-
-    @DeleteMapping("/{userId}/selected/{word}/{translation}")
-    public void removeSelected(
-            @PathVariable("userId") String userId,
-            @PathVariable("word") String word,
-            @PathVariable("translation") String translation
-    ) {
-        User user = getUser(userId);
-        ofNullable(user.getSelected().get(word))
-                .ifPresent(translations -> translations.remove(translation));
-        userRepository.save(user);
-    }
-
-    @PutMapping("/{userId}/hidden/{word}")
-    public void putHidden(
-            @PathVariable("userId") String userId,
-            @PathVariable("word") String word
-    ) {
-        User user = getUser(userId);
-        user.getHidden().add(word);
-        userRepository.save(user);
-    }
-
-    @DeleteMapping("/{userId}/hidden/{word}")
-    public void removeHidden(
-            @PathVariable("userId") String userId,
-            @PathVariable("word") String word
-    ) {
-        User user = getUser(userId);
-        user.getHidden().remove(word);
-        userRepository.save(user);
+        return getUser(userId).getBooks().stream().filter(book -> book.getName().equals(bookId)).findAny();
     }
 
     private User getUser(String userId) {
         return userRepository.findById(userId).orElseThrow(IllegalArgumentException::new);
     }
 
-    private void merge(User source, User target) {
-        source.getSelected().forEach((word, translations) ->
-                target.getSelected().computeIfAbsent(word, ignored -> new HashSet<>()).addAll(translations));
-        target.getHidden().addAll(source.getHidden());
-        target.getBooks().putAll(source.getBooks());
+    private void add(User user, User toAdd) {
+        user.getSelected().addAll(toAdd.getSelected());
+        user.getHidden().addAll(toAdd.getHidden());
+        user.getBooks().addAll(toAdd.getBooks());
+    }
+
+    private void remove(User user, User toRemove) {
+        user.getSelected().removeAll(toRemove.getSelected());
+        user.getHidden().removeAll(toRemove.getHidden());
+        // TODO: fix this...
+        Set<String> booksToRemove = toRemove.getBooks().stream()
+                .map(Book::getName)
+                .collect(toSet());
+        user.getBooks().removeIf(book -> booksToRemove.contains(book.getName()));
     }
 }

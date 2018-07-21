@@ -3,7 +3,6 @@ package edu.self.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -12,10 +11,10 @@ import java.util.Set;
 public class User {
     @Id
     private String username;
-    private Map<String, Set<String>> selected = new HashMap<>();
+    private Set<Map<Language, String>> selected = new HashSet<>();
     private Set<String> hidden = new HashSet<>();
     // TODO: implement book bodies as references to another collection
-    private Map<String, String> books = new HashMap<>();
+    private Set<Book> books = new HashSet<>();
 
     public User() {
         // for json deserialization
@@ -33,11 +32,11 @@ public class User {
         this.username = username;
     }
 
-    public Map<String, Set<String>> getSelected() {
+    public Set<Map<Language, String>> getSelected() {
         return selected;
     }
 
-    public void setSelected(Map<String, Set<String>> selected) {
+    public void setSelected(Set<Map<Language, String>> selected) {
         this.selected = selected;
     }
 
@@ -49,11 +48,11 @@ public class User {
         this.hidden = hidden;
     }
 
-    public Map<String, String> getBooks() {
+    public Set<Book> getBooks() {
         return books;
     }
 
-    public void setBooks(Map<String, String> books) {
+    public void setBooks(Set<Book> books) {
         this.books = books;
     }
 }
