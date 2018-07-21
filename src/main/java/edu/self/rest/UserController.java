@@ -36,9 +36,19 @@ public class UserController {
         return userRepository.findById(userId);
     }
 
-    @PostMapping
-    public void saveUser(@RequestBody User user) {
-        userRepository.save(user);
+    @PatchMapping("/{userId}")
+    public User patchUser(@PathVariable("userId") String userId, @RequestBody User userPatch) {
+        // TODO: configure mapKeyDotReplacement or do not use user inputs as keys
+        User user = userRepository.findById(userId).orElseGet(() -> new User(userId));
+        merge(userPatch, user);
+        return userRepository.save(user);
+    }
+
+    private void merge(User source, User target) {
+        source.getSelected().forEach((word, translations) ->
+                target.getSelected().computeIfAbsent(word, ignored -> new HashSet<>()).addAll(translations));
+        target.getHidden().addAll(source.getHidden());
+        target.getBooks().putAll(source.getBooks());
     }
 
     @PutMapping("/{userId}/selected/{word}/{translation}")

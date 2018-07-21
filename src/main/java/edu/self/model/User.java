@@ -17,6 +17,14 @@ public class User {
     // TODO: implement book bodies as references to another collection
     private Map<String, String> books = new HashMap<>();
 
+    public User() {
+        // for json deserialization
+    }
+
+    public User(String username) {
+        this.username = username;
+    }
+
     public String getUsername() {
         return username;
     }
