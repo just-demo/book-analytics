@@ -44,11 +44,36 @@ public class UserController {
         return userRepository.save(user);
     }
 
-    private void merge(User source, User target) {
-        source.getSelected().forEach((word, translations) ->
-                target.getSelected().computeIfAbsent(word, ignored -> new HashSet<>()).addAll(translations));
-        target.getHidden().addAll(source.getHidden());
-        target.getBooks().putAll(source.getBooks());
+    @GetMapping("/{userId}/books/{bookId}")
+    public Optional<String> getBook(
+            @PathVariable("userId") String userId,
+            @PathVariable("bookId") String bookId
+    ) {
+        // TODO: fetch book from a separate collection
+        return ofNullable(getUser(userId).getBooks().get(bookId));
+    }
+
+    @PutMapping("/{userId}/books/{bookId}")
+    public void saveBook(
+            @PathVariable("userId") String userId,
+            @PathVariable("bookId") String bookId,
+            @RequestBody String text
+    ) {
+        User user = getUser(userId);
+        // TODO: put book into a separate collection
+        user.getBooks().put(bookId, text);
+        userRepository.save(user);
+    }
+
+    @DeleteMapping("/{userId}/books/{bookId}")
+    public void removeBook(
+            @PathVariable("userId") String userId,
+            @PathVariable("bookId") String bookId
+    ) {
+        User user = getUser(userId);
+        // TODO: delete book from a separate collection
+        user.getBooks().put(bookId, null);
+        userRepository.save(user);
     }
 
     @PutMapping("/{userId}/selected/{word}/{translation}")
@@ -96,5 +121,12 @@ public class UserController {
 
     private User getUser(String userId) {
         return userRepository.findById(userId).orElseThrow(IllegalArgumentException::new);
+    }
+
+    private void merge(User source, User target) {
+        source.getSelected().forEach((word, translations) ->
+                target.getSelected().computeIfAbsent(word, ignored -> new HashSet<>()).addAll(translations));
+        target.getHidden().addAll(source.getHidden());
+        target.getBooks().putAll(source.getBooks());
     }
 }
