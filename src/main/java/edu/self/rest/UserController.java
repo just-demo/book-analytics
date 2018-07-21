@@ -38,6 +38,8 @@ public class UserController {
 
     @PatchMapping("/{userId}")
     public User patchUser(@PathVariable("userId") String userId, @RequestBody User userPatch) {
+        // TODO: consider selected of type [{en: word, ru: translation}, ...]
+        // TODO: consider book of type {name:..., content:..., language: en}
         // TODO: configure mapKeyDotReplacement or do not use user inputs as keys
         User user = userRepository.findById(userId).orElseGet(() -> new User(userId));
         merge(userPatch, user);
