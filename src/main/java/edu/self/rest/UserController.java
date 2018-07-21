@@ -1,8 +1,5 @@
 package edu.self.rest;
 
-import edu.self.dto.Ignorable;
-import edu.self.dto.Translation;
-import edu.self.model.Credential;
 import edu.self.model.User;
 import edu.self.repositories.CredentialRepository;
 import edu.self.repositories.UserRepository;
@@ -10,11 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Optional;
 
-import static java.util.Collections.emptyMap;
-import static org.apache.commons.codec.digest.DigestUtils.md5Hex;
+import static java.util.Optional.ofNullable;
+import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
 @RestController
 @RequestMapping("/users")
@@ -33,42 +30,62 @@ public class UserController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @PostMapping
-    public void createUser(@RequestBody Credential credential) {
-        credential.setPassword(passwordEncoder.encode(credential.getPassword()));
-        credentialRepository.save(credential);
-    }
-
     @GetMapping("/{userId}")
     public Optional<User> findUser(@PathVariable("userId") String userId) {
         return userRepository.findById(userId);
     }
 
-    @GetMapping("/{userId}/translations")
-    public Map<String, String> getTranslations(@PathVariable("userId") String userId) {
-        // TODO: try to fetch this data as userRepository.findTranslationsByUserId
-        return userRepository.findById(userId)
-                .map(User::getTranslations)
-                .orElse(emptyMap());
+    @PostMapping
+    public void saveUser(@RequestBody User user) {
+        userRepository.save(user);
     }
 
-    @PutMapping("/{userId}/translations")
-    public Translation setTranslation(@PathVariable("userId") String userId, @RequestBody Translation translation) {
+    @PutMapping("/{userId}/selected/{word}/{translation}")
+    public void putSelected(
+            @PathVariable("userId") String userId,
+            @PathVariable("word") String word,
+            @PathVariable("translation") String translation
+    ) {
         User user = getUser(userId);
-        user.getTranslations().put(translation.getText(), translation.getTranslation());
+        user.getSelected().computeIfAbsent(word, ignored -> new HashSet<>()).add(translation);
         userRepository.save(user);
-        return translation;
     }
 
-    @PutMapping("/ignorable")
-    public void setIgnorable(@PathVariable("userId") String userId, @RequestBody Ignorable ignorable) {
+    @DeleteMapping("/{userId}/selected/{word}/{translation}")
+    public void removeSelected(
+            @PathVariable("userId") String userId,
+            @PathVariable("word") String word,
+            @PathVariable("translation") String translation
+    ) {
         User user = getUser(userId);
-        if (ignorable.isIgnored()) {
-            user.getIgnored().add(ignorable.getText());
-        } else {
-            user.getIgnored().remove(ignorable.getText());
-        }
+        ofNullable(user.getSelected().get(word))
+                .ifPresent(translations -> translations.remove(translation));
         userRepository.save(user);
+    }
+
+    @PutMapping("/{userId}/hidden/{word}")
+    public void putHidden(
+            @PathVariable("userId") String userId,
+            @PathVariable("word") String word
+    ) {
+        User user = getUser(userId);
+        user.getHidden().add(word);
+        userRepository.save(user);
+    }
+
+    @DeleteMapping("/{userId}/hidden/{word}")
+    public void removeHidden(
+            @PathVariable("userId") String userId,
+            @PathVariable("word") String word
+    ) {
+        User user = getUser(userId);
+        user.getHidden().remove(word);
+        userRepository.save(user);
+    }
+
+    @GetMapping(path = "/test", produces = TEXT_PLAIN_VALUE)
+    public String test() {
+        return "User Test";
     }
 
     private User getUser(String userId) {

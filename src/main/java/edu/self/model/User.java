@@ -12,9 +12,10 @@ import java.util.Set;
 public class User {
     @Id
     private String username;
-    private Map<String, String> translations = new HashMap<>();
-    private Set<String> ignored = new HashSet<>();
-    private Set<String> selected = new HashSet<>();
+    private Map<String, Set<String>> selected = new HashMap<>();
+    private Set<String> hidden = new HashSet<>();
+    // TODO: implement book bodies as references to another collection
+    private Map<String, String> books = new HashMap<>();
 
     public String getUsername() {
         return username;
@@ -24,27 +25,27 @@ public class User {
         this.username = username;
     }
 
-    public Map<String, String> getTranslations() {
-        return translations;
-    }
-
-    public void setTranslations(Map<String, String> translations) {
-        this.translations = translations;
-    }
-
-    public Set<String> getIgnored() {
-        return ignored;
-    }
-
-    public void setIgnored(Set<String> ignored) {
-        this.ignored = ignored;
-    }
-
-    public Set<String> getSelected() {
+    public Map<String, Set<String>> getSelected() {
         return selected;
     }
 
-    public void setSelected(Set<String> selected) {
+    public void setSelected(Map<String, Set<String>> selected) {
         this.selected = selected;
+    }
+
+    public Set<String> getHidden() {
+        return hidden;
+    }
+
+    public void setHidden(Set<String> hidden) {
+        this.hidden = hidden;
+    }
+
+    public Map<String, String> getBooks() {
+        return books;
+    }
+
+    public void setBooks(Map<String, String> books) {
+        this.books = books;
     }
 }

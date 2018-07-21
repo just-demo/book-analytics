@@ -31,7 +31,7 @@ public class JsonUtils {
 
     private static ObjectMapper buildMapper() {
         ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+//        mapper.enable(SerializationFeature.INDENT_OUTPUT);
         return mapper;
     }
 }

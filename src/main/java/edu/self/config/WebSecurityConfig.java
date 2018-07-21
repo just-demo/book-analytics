@@ -5,6 +5,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
+import static org.springframework.http.HttpMethod.OPTIONS;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpMethod.PUT;
 
@@ -22,10 +23,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //                .headers().frameOptions().()
 //                .and()
                 .requestMatchers()
-                .antMatchers("/users/**")
+                .antMatchers("/usersNonExistent/**")
                 .and()
                 .authorizeRequests()
-                .antMatchers(POST, "/users").permitAll()
+//                .antMatchers(POST, "/users").permitAll()
+                .antMatchers(OPTIONS).permitAll()
 //                .antMatchers("/auth").permitAll()
                 .anyRequest().authenticated()
         ;

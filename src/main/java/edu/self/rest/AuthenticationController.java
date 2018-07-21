@@ -10,8 +10,9 @@ import java.util.Map;
 
 import static java.util.Collections.singletonMap;
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
+import static org.springframework.web.cors.CorsConfiguration.ALL;
 
-@CrossOrigin(origins = "*")
+@CrossOrigin(ALL)
 @RestController
 @RequestMapping("/auth")
 public class AuthenticationController {
@@ -27,9 +28,11 @@ public class AuthenticationController {
         if (credentialRepository.existsById(credential.getUsername())) {
             throw new IllegalArgumentException("Such user already exists");
         }
+        // Building response before password is encoded
+        Map<String, String> response = buildAuthResponse(credential);
         credential.setPassword(passwordEncoder.encode(credential.getPassword()));
         credentialRepository.save(credential);
-        return buildAuthResponse(credential);
+        return response;
     }
 
     @PostMapping
