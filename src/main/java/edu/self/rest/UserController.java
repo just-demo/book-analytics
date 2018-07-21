@@ -11,8 +11,9 @@ import java.util.HashSet;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
-import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
+import static org.springframework.web.cors.CorsConfiguration.ALL;
 
+@CrossOrigin(ALL)
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -81,11 +82,6 @@ public class UserController {
         User user = getUser(userId);
         user.getHidden().remove(word);
         userRepository.save(user);
-    }
-
-    @GetMapping(path = "/test", produces = TEXT_PLAIN_VALUE)
-    public String test() {
-        return "User Test";
     }
 
     private User getUser(String userId) {
