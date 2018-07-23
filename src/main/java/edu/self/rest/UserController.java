@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toSet;
 import static org.springframework.web.cors.CorsConfiguration.ALL;
@@ -47,19 +46,17 @@ public class UserController {
 
     @PatchMapping("/{userId}/remove")
     public void removeUserData(@PathVariable("userId") String userId, @RequestBody User userRemove) {
-        User user = userRepository.findById(userId).orElseGet(() -> new User(userId));
-        remove(user, userRemove);
-        userRepository.save(user);
+        userRepository.findById(userId).ifPresent(user -> {
+            remove(user, userRemove);
+            userRepository.save(user);
+        });
     }
 
     @GetMapping("/{userId}/books/{bookId}")
     public Optional<Book> getBook(@PathVariable("userId") String userId, @PathVariable("bookId") String bookId) {
         // TODO: fetch book from a separate collection
-        return getUser(userId).getBooks().stream().filter(book -> book.getName().equals(bookId)).findAny();
-    }
-
-    private User getUser(String userId) {
-        return userRepository.findById(userId).orElseThrow(IllegalArgumentException::new);
+        return userRepository.findById(userId)
+                .flatMap(user -> user.getBooks().stream().filter(book -> book.getName().equals(bookId)).findAny());
     }
 
     private void add(User user, User toAdd) {
