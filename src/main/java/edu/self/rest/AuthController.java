@@ -5,6 +5,7 @@ import edu.self.model.Credential;
 import edu.self.repositories.CredentialRepository;
 import edu.self.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +13,7 @@ import java.util.Map;
 
 import static java.util.Collections.singletonMap;
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.web.cors.CorsConfiguration.ALL;
 
 @CrossOrigin(ALL)
@@ -31,7 +33,7 @@ public class AuthController {
     @PutMapping
     public Map<String, String> register(@RequestBody Credential credential) {
         if (credentialRepository.existsById(credential.getUsername())) {
-            throw new IllegalArgumentException("Such user already exists");
+            throw new DataIntegrityViolationException("Such user already exists");
         }
         // Building response before password is encoded
         Map<String, String> response = buildAuthResponse(credential);
@@ -76,5 +78,11 @@ public class AuthController {
                 "Authorization",
                 "Basic " + encodeBase64String((username + ":" + password).getBytes())
         );
+    }
+
+    @ResponseStatus(CONFLICT)
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public void handleConflict() {
+        // No-op
     }
 }
