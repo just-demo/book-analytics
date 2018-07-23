@@ -13,6 +13,7 @@ import java.util.Map;
 
 import static java.util.Collections.singletonMap;
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.web.cors.CorsConfiguration.ALL;
 
@@ -78,6 +79,12 @@ public class AuthController {
                 "Authorization",
                 "Basic " + encodeBase64String((username + ":" + password).getBytes())
         );
+    }
+
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public void handleBadRequest() {
+        // No-op
     }
 
     @ResponseStatus(CONFLICT)

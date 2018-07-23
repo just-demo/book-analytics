@@ -6,8 +6,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 import static org.springframework.http.HttpMethod.OPTIONS;
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.HttpMethod.PUT;
 
 @Configuration
 @EnableWebSecurity
@@ -19,61 +17,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .httpBasic()
                 .and()
                 .csrf().disable()
-//                .cors().configurationSource(allowAllCorsConfiguration())
-//                .headers().frameOptions().()
-//                .and()
                 .requestMatchers()
-                .antMatchers("/usersNonExistent/**")
+                .antMatchers("/auth/**", "/users/**")
                 .and()
                 .authorizeRequests()
-//                .antMatchers(POST, "/users").permitAll()
-//                .antMatchers(OPTIONS).permitAll()
-//                .antMatchers("/auth").permitAll()
-                .anyRequest().authenticated()
+                .antMatchers(OPTIONS).permitAll()
+                .antMatchers("/auth").permitAll()
+                .antMatchers("/auth/{userId}/**").access("#userId == principal.username")
+                .antMatchers("/users/{userId}/**").access("#userId == principal.username")
+                .anyRequest().denyAll()
         ;
     }
-
-//    @Bean
-//    public CorsConfigurationSource allowAllCorsConfiguration() {
-//        CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.setAllowedOrigins(singletonList(ALL));
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", configuration);
-//        return source;
-//    }
-
-    protected void configure2(HttpSecurity http) throws Exception {
-        http
-                .httpBasic()
-                .and()
-                .csrf()
-                .disable()
-                .authorizeRequests()
-                .antMatchers(PUT, "/**").permitAll()
-                .antMatchers("/**").permitAll()
-                .anyRequest().authenticated();
-//                .antMatchers("/css/**", "/index").permitAll()
-//                .antMatchers("/user/**").hasRole("USER")
-//                .anyRequest().authenticated()
-//                .and()
-//                .formLogin()
-//                .loginPage("/login.html")
-//                .permitAll()
-//                .and()
-//                .logout()
-//                .permitAll()
-    }
-
-//    @Bean
-//    @Override
-//    public UserDetailsService userDetailsService() {
-//        UserDetails user =
-//                User.withDefaultPasswordEncoder()
-//                        .username("user")
-//                        .password("password")
-//                        .roles("USER")
-//                        .build();
-//
-//        return new InMemoryUserDetailsManager(user);
-//    }
 }
