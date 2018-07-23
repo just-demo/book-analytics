@@ -63,6 +63,12 @@ public class AuthController {
         return buildAuthResponse(userId, changePassword.getNewPassword());
     }
 
+    @DeleteMapping("/{userId}")
+    public void delete(@PathVariable("userId") String userId) {
+        userRepository.deleteById(userId);
+        credentialRepository.deleteById(userId);
+    }
+
     private boolean validatePassword(String userId, String password) {
         return credentialRepository.findById(userId)
                 .filter(actual -> passwordEncoder.matches(password, actual.getPassword()))
