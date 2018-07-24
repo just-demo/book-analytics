@@ -11,8 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
 import static org.springframework.web.cors.CorsConfiguration.ALL;
@@ -84,25 +86,4 @@ public class UserController {
                 .flatMap(bookRepository::findById)
                 .map(Book::getContent);
     }
-
-//    @GetMapping("/{userId}/books/{bookId}")
-//    public UserBook addBook(@PathVariable("userId") String userId, @PathVariable("bookId") String bookId, @RequestBody UserBook userBook) {
-//        User user = userRepository.findById(userId).orElseGet(() -> new User(userId));
-//        Book book = bookRepository.save(new Book(userBook.getContent()));
-//        userBook.setId(book.getId());
-//        userRepository.save(user);
-//        return userBook;
-//    }
-//
-//    @GetMapping("/{userId}/books/{bookId}")
-//    public void removeBook(@PathVariable("userId") String userId, @PathVariable("bookId") String bookId) {
-//        userRepository.findById(userId).ifPresent(user -> {
-//            new ArrayList<>(user.getBooks()).stream()
-//                    .filter(userBook -> userBook.getId().equals(bookId))
-//                    .forEach(userBook -> {
-//                        bookRepository.deleteById(userBook.getId());
-//                        user.getBooks().remove(userBook);
-//                    });
-//        });
-//    }
 }

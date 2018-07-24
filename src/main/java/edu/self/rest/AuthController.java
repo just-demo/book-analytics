@@ -2,7 +2,9 @@ package edu.self.rest;
 
 import edu.self.dto.ChangePasswordRequest;
 import edu.self.model.Credential;
+import edu.self.repositories.BookRepository;
 import edu.self.repositories.CredentialRepository;
+import edu.self.repositories.UserBookRepository;
 import edu.self.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -27,6 +29,12 @@ public class AuthController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserBookRepository userBookRepository;
+
+    @Autowired
+    private BookRepository bookRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -65,6 +73,7 @@ public class AuthController {
 
     @DeleteMapping("/{userId}")
     public void delete(@PathVariable("userId") String userId) {
+        bookRepository.deleteByIdIn(userBookRepository.findBookIds(userId));
         userRepository.deleteById(userId);
         credentialRepository.deleteById(userId);
     }
