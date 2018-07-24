@@ -11,10 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
 import static org.springframework.web.cors.CorsConfiguration.ALL;
@@ -53,11 +51,14 @@ public class UserController {
         User user = userRepository.findById(userId).orElseGet(() -> new User(userId));
         user.getSelected().addAll(userPatch.getSelected());
         user.getHidden().addAll(userPatch.getHidden());
-        userPatch.getBooks().forEach(userBook -> {
-            Book book = bookRepository.save(new Book(userBook.getContent()));
-            userBook.setId(book.getId());
-        });
-        user.getBooks().addAll(userPatch.getBooks());
+        userPatch.getBooks().stream()
+                // TODO: New books are skipped even if content is different, consider adding corresponding validation on UI
+                .filter(userBook -> user.getBooks().stream().map(UserBook::getName).noneMatch(userBook.getName()::equals))
+                .forEach(userBook -> {
+                    Book book = bookRepository.save(new Book(userBook.getContent()));
+                    userBook.setId(book.getId());
+                    user.getBooks().add(userBook);
+                });
         userRepository.save(user);
     }
 
