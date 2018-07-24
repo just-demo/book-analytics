@@ -13,8 +13,7 @@ public class User {
     private String username;
     private Set<Map<Language, String>> selected = new HashSet<>();
     private Set<String> hidden = new HashSet<>();
-    // TODO: implement book bodies as references to another collection
-    private Set<Book> books = new HashSet<>();
+    private Set<UserBook> books = new HashSet<>();
 
     public User() {
         // for json deserialization
@@ -48,11 +47,11 @@ public class User {
         this.hidden = hidden;
     }
 
-    public Set<Book> getBooks() {
+    public Set<UserBook> getBooks() {
         return books;
     }
 
-    public void setBooks(Set<Book> books) {
+    public void setBooks(Set<UserBook> books) {
         this.books = books;
     }
 }

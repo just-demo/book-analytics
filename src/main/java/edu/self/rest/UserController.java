@@ -2,7 +2,10 @@ package edu.self.rest;
 
 import edu.self.model.Book;
 import edu.self.model.User;
+import edu.self.model.UserBook;
+import edu.self.repositories.BookRepository;
 import edu.self.repositories.CredentialRepository;
+import edu.self.repositories.UserBookRepository;
 import edu.self.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +27,12 @@ public class UserController {
     @Autowired
     private CredentialRepository credentialRepository;
 
+    @Autowired
+    private BookRepository bookRepository;
+
+    @Autowired
+    private UserBookRepository userBookRepository;
+
     @GetMapping
     public Iterable<User> getUsers() {
         return userRepository.findAll();
@@ -40,38 +49,60 @@ public class UserController {
     @PatchMapping("/{userId}")
     public void addUserData(@PathVariable("userId") String userId, @RequestBody User userPatch) {
         User user = userRepository.findById(userId).orElseGet(() -> new User(userId));
-        add(user, userPatch);
+        user.getSelected().addAll(userPatch.getSelected());
+        user.getHidden().addAll(userPatch.getHidden());
+        userPatch.getBooks().forEach(userBook -> {
+            Book book = bookRepository.save(new Book(userBook.getContent()));
+            userBook.setId(book.getId());
+        });
+        user.getBooks().addAll(userPatch.getBooks());
         userRepository.save(user);
     }
 
     @PatchMapping("/{userId}/remove")
     public void removeUserData(@PathVariable("userId") String userId, @RequestBody User userRemove) {
         userRepository.findById(userId).ifPresent(user -> {
-            remove(user, userRemove);
+            user.getSelected().removeAll(userRemove.getSelected());
+            user.getHidden().removeAll(userRemove.getHidden());
+            Set<String> bookNamesToRemove = userRemove.getBooks().stream()
+                    .map(UserBook::getName)
+                    .collect(toSet());
+            Set<UserBook> booksToRemove = user.getBooks().stream()
+                    .filter(book -> bookNamesToRemove.contains(book.getName()))
+                    .collect(toSet());
+            booksToRemove.stream()
+                    .map(UserBook::getId)
+                    .forEach(bookRepository::deleteById);
+            user.getBooks().retainAll(booksToRemove);
             userRepository.save(user);
         });
     }
 
-    @GetMapping("/{userId}/books/{bookId}")
-    public Optional<Book> getBook(@PathVariable("userId") String userId, @PathVariable("bookId") String bookId) {
-        // TODO: fetch book from a separate collection
-        return userRepository.findById(userId)
-                .flatMap(user -> user.getBooks().stream().filter(book -> book.getName().equals(bookId)).findAny());
+    @GetMapping("/{userId}/books/{bookName}")
+    public Optional<String> getBook(@PathVariable("userId") String userId, @PathVariable("bookName") String bookName) {
+        return userBookRepository.findBookId(userId, bookName)
+                .flatMap(bookRepository::findById)
+                .map(Book::getContent);
     }
 
-    private void add(User user, User toAdd) {
-        user.getSelected().addAll(toAdd.getSelected());
-        user.getHidden().addAll(toAdd.getHidden());
-        user.getBooks().addAll(toAdd.getBooks());
-    }
-
-    private void remove(User user, User toRemove) {
-        user.getSelected().removeAll(toRemove.getSelected());
-        user.getHidden().removeAll(toRemove.getHidden());
-        // TODO: fix this...
-        Set<String> booksToRemove = toRemove.getBooks().stream()
-                .map(Book::getName)
-                .collect(toSet());
-        user.getBooks().removeIf(book -> booksToRemove.contains(book.getName()));
-    }
+//    @GetMapping("/{userId}/books/{bookId}")
+//    public UserBook addBook(@PathVariable("userId") String userId, @PathVariable("bookId") String bookId, @RequestBody UserBook userBook) {
+//        User user = userRepository.findById(userId).orElseGet(() -> new User(userId));
+//        Book book = bookRepository.save(new Book(userBook.getContent()));
+//        userBook.setId(book.getId());
+//        userRepository.save(user);
+//        return userBook;
+//    }
+//
+//    @GetMapping("/{userId}/books/{bookId}")
+//    public void removeBook(@PathVariable("userId") String userId, @PathVariable("bookId") String bookId) {
+//        userRepository.findById(userId).ifPresent(user -> {
+//            new ArrayList<>(user.getBooks()).stream()
+//                    .filter(userBook -> userBook.getId().equals(bookId))
+//                    .forEach(userBook -> {
+//                        bookRepository.deleteById(userBook.getId());
+//                        user.getBooks().remove(userBook);
+//                    });
+//        });
+//    }
 }

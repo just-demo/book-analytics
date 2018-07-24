@@ -1,18 +1,24 @@
 package edu.self.model;
 
-import java.util.Objects;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
+@Document(collection = "books")
 public class Book {
-    private String name;
+    @Id
+    private String id;
     private String content;
-    private Language language;
 
-    public String getName() {
-        return name;
+    public Book(String content) {
+        this.content = content;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getContent() {
@@ -21,28 +27,5 @@ public class Book {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public Language getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(Language language) {
-        this.language = language;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Book book = (Book) o;
-        return Objects.equals(name, book.name) &&
-                Objects.equals(content, book.content) &&
-                language == book.language;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, content, language);
     }
 }
