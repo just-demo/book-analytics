@@ -7,17 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 import static com.mongodb.DBCollection.ID_FIELD_NAME;
+import static java.util.Collections.emptySet;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 
-@Repository
 public class UserBookRepositoryImpl implements UserBookRepository {
 
     @Autowired
@@ -39,7 +38,10 @@ public class UserBookRepositoryImpl implements UserBookRepository {
         Query query = new Query();
         query.addCriteria(where(ID_FIELD_NAME).is(username));
         query.fields().include("books.id");
-        User user = mongoOperations.findOne(query, User.class);
-        return user.getBooks().stream().map(UserBook::getId).collect(toList());
+        return ofNullable(mongoOperations.findOne(query, User.class))
+                .map(User::getBooks)
+                .orElse(emptySet())
+                .stream()
+                .map(UserBook::getId).collect(toList());
     }
 }

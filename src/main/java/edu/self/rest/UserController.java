@@ -5,7 +5,6 @@ import edu.self.model.User;
 import edu.self.model.UserBook;
 import edu.self.repositories.BookRepository;
 import edu.self.repositories.CredentialRepository;
-import edu.self.repositories.UserBookRepository;
 import edu.self.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,9 +28,6 @@ public class UserController {
 
     @Autowired
     private BookRepository bookRepository;
-
-    @Autowired
-    private UserBookRepository userBookRepository;
 
     @GetMapping
     public Iterable<User> getUsers() {
@@ -83,7 +79,7 @@ public class UserController {
 
     @GetMapping("/{userId}/books/{bookName}")
     public Optional<String> getBook(@PathVariable("userId") String userId, @PathVariable("bookName") String bookName) {
-        return userBookRepository.findBookId(userId, bookName)
+        return userRepository.findBookId(userId, bookName)
                 .flatMap(bookRepository::findById)
                 .map(Book::getContent);
     }
